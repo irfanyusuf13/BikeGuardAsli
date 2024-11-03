@@ -1,33 +1,57 @@
-import React, { useState } from 'react';
-
+import React from 'react';
 
 const Register = () => {
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-          <div className="bg-white p-8 rounded-lg shadow-md w-96">
-            <h2 className="text-3xl font-bold text-center mb-4">Register Your Account</h2>
+  return (
+    <section className="flex min-h-screen">
+      {/* Bagian Kiri dengan Warna Background #ADD8E6 */}
+      <div className="hidden md:flex w-1/2 bg-[#ADD8E6] items-center justify-center">
+        <img
+          src="https://via.placeholder.com/200" // Ganti dengan URL gambar yang sebenarnya
+          alt="Lock Icon"
+          className="w-48 h-48"
+        />
+      </div>
+
+      {/* Bagian Kanan - Form Register */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center px-12 py-8 bg-white">
+        <h2 className="text-4xl font-bold text-blue-600 mb-2">BikeGuard</h2>
+        <p className="text-gray-600 mb-8">Register Your Account</p>
+
+        <form className="space-y-6 w-full max-w-sm">
+          <div>
+            <label className="block text-gray-700 font-semibold">EMAIL</label>
             <input
               type="email"
-              placeholder="Email"
-              className="w-full p-2 mb-4 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
+              placeholder="Enter your email"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
             />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold">USERNAME</label>
             <input
               type="text"
-              placeholder="Username"
-              className="w-full p-2 mb-4 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
+              placeholder="Enter your username"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
             />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-semibold">PASSWORD</label>
             <input
               type="password"
-              placeholder="Password"
-              className="w-full p-2 mb-4 border-b-2 border-gray-300 focus:outline-none focus:border-blue-500"
+              placeholder="••••••••"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
             />
-            <button className="w-full bg-blue-500 text-white py-2 rounded-full hover:bg-blue-600">
-              Register
-            </button>
           </div>
-        </div>
-      );
-    };
+          <button
+            type="submit"
+            className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
+          >
+            REGISTER
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+};
 
 export default Register;
-
