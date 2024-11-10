@@ -3,31 +3,30 @@ const cors = require("cors");
 const pool = require('./src/config/database');
 require("dotenv").config();
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-
 // Import routes
-app.get('/userProfile', services.getAllUserProfile);
-app.post('/register', services.registerUser);
-app.post('/login', services.loginUser);
 
 const AdminRoutes = require('./src/routes/adminRoutes');
 const BicycleRoutes = require('./src/routes/bicycleRoutes');
 const ParkingSlotRoutes = require('./src/routes/parkingSlotRoutes');
 const QrCodeRoutes = require('./src/routes/qrCodeRoutes');
 const UserRoutes = require('./src/routes/userRoutes');
+const MonitorRoutes = require('./src/routes/monitoringSystemRoutes');
 
 // Use routes
+
+app.use('/user', UserRoutes);
 app.use('/admin', AdminRoutes);
 app.use('/bicycle', BicycleRoutes);
-app.use('/parkingslot', ParkingSlotRoutes);
-app.use('/qrcode', QrCodeRoutes);
-app.use('/user', UserRoutes);
+app.use('/parking-slot', ParkingSlotRoutes);
+app.use('/qr-code', QrCodeRoutes);
+app.use('/monitor', MonitorRoutes);
 
 pool.connect().then(() => {
     console.log('Connected to the NeonDB');
