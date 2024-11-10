@@ -1,17 +1,14 @@
 #include <ESP32Servo.h>
 #include <WiFi.h>
-#include <WifiClient.h>
-
-
+#include <WiFiClient.h>
 
 const char ssid[] = "Wokwi-GUEST";
 const char password[] = "";
 
-Servo myservo;  // create servo object to control a servo
-
-bool isLocked = false;
-int pos = 0;    // variable to store the servo position
-int counter = 0;
+Servo myservo;         // Object servo untuk mengontrol servo
+bool isLocked = false; // Status kunci
+int pos = 0;           // Variabel untuk posisi servo
+int counter = 0;       // Counter untuk durasi kunci
 int pinServo = 13;
 int triggerPin = 12;
 int echoPin = 14;
@@ -21,18 +18,15 @@ float distance;
 
 SemaphoreHandle_t mutex = NULL;
 
-
-
-void vTimerTask( void * pvParameters )
-{
-  for(;;)
-  {
-    if (isLocked)
-    {
+// Task untuk menghitung waktu kunci otomatis terbuka setelah 10 detik
+void vTimerTask(void *pvParameters) {
+  for (;;) {
+    if (isLocked) {
       counter++;
-      if (counter == 10)
-      {
+      if (counter == 10) { // Setelah 10 detik, buka kunci
+        xSemaphoreTake(mutex, portMAX_DELAY);
         isLocked = false;
+        xSemaphoreGive(mutex);
         counter = 0;
       }
     }
@@ -40,43 +34,76 @@ void vTimerTask( void * pvParameters )
   }
 }
 
-
-void sensorTask (void * pvParameters)
-{
-  for(;;)
-  {
+// Task untuk membaca sensor ultrasonic
+void sensorTask(void *pvParameters) {
+  for (;;) {
     digitalWrite(triggerPin, LOW);
     delayMicroseconds(2);
     digitalWrite(triggerPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(triggerPin, LOW);
+
+    
     duration = pulseIn(echoPin, HIGH);
-    distance = duration * 0.034 / 2;
+    distance = duration * 0.034 / 2; /
+    
     Serial.print("Distance: ");
     Serial.println(distance);
-    if (distance < 10)
-    {
+
+    if (distance < 10) { 
+      xSemaphoreTake(mutex, portMAX_DELAY);
       isLocked = true;
+      xSemaphoreGive(mutex);
     }
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    
+    vTaskDelay(500 / portTICK_PERIOD_MS); 
   }
 }
 
 
+void lockControlTask(void *pvParameters) {
+  for (;;) {
+    xSemaphoreTake(mutex, portMAX_DELAY);
+    if (isLocked) {
+      myservo.write(0); 
+      digitalWrite(buzzer, HIGH); 
+    } else {
+      myservo.write(90); 
+      digitalWrite(buzzer, LOW); 
+    }
+    xSemaphoreGive(mutex);
+
+    vTaskDelay(100 / portTICK_PERIOD_MS); 
+  }
+}
+
 void setup() {
   Serial.begin(115200);
-  myservo.attach(pinServo);  // attaches the servo on pin 13 to the servo object
+  myservo.attach(pinServo);  
   pinMode(triggerPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(buzzer, OUTPUT);
+
+
+  mutex = xSemaphoreCreateMutex();
+  if (mutex == NULL) {
+    Serial.println("Gagal membuat mutex!");
+    while (1);
+  }
+
+  
   xTaskCreate(vTimerTask, "TimerTask", 1000, NULL, 1, NULL);
   xTaskCreate(sensorTask, "SensorTask", 1000, NULL, 1, NULL);
+  xTaskCreate(lockControlTask, "LockControlTask", 1000, NULL, 1, NULL);
+
+
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.println("Connecting to WiFi...");
   }
   Serial.println("Connected to WiFi");
 }
 
+void loop() {
+}
