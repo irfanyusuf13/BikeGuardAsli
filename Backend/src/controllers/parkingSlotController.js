@@ -1,7 +1,7 @@
 const pool = require('../config/database');
-const { BaseApiResponse } = require('../config/utils');
+const { BaseApiResponse, ParkingSlotResponse } = require('../config/utils'); // Pastikan ParkingSlotResponse diimpor
 
-// Controller to create a new parking slot
+// Controller untuk membuat slot parkir baru
 exports.createParkingSlot = async (req, res) => {
     const { location } = req.body;
     try {
@@ -10,14 +10,14 @@ exports.createParkingSlot = async (req, res) => {
             [location]
         );
         const slotData = result.rows[0];
-        res.status(201).json(BaseApiResponse("Parking slot created successfully", ParkingSlotResponse(slotData)));
+        res.status(201).json(BaseApiResponse("Slot parkir berhasil dibuat", ParkingSlotResponse(slotData)));
     } catch (error) {
         console.error(error);
-        res.status(500).json(BaseApiResponse("Failed to create parking slot", null));
+        res.status(500).json(BaseApiResponse("Gagal membuat slot parkir", null));
     }
 };
 
-// Controller to retrieve a parking slot by ID
+// Controller untuk mengambil slot parkir berdasarkan ID
 exports.getParkingSlotById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -31,19 +31,19 @@ exports.getParkingSlotById = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json(BaseApiResponse("Parking slot not found", null));
+            return res.status(404).json(BaseApiResponse("Slot parkir tidak ditemukan", null));
         }
 
         const slotData = result.rows[0];
-        slotData.bicycles = result.rows.map(row => row.bicycle_id).filter(Boolean); // Collect all parked bicycle IDs
-        res.status(200).json(BaseApiResponse("Parking slot retrieved successfully", ParkingSlotResponse(slotData)));
+        slotData.bicycles = result.rows.map(row => row.bicycle_id).filter(Boolean); // Kumpulkan semua ID sepeda yang terparkir
+        res.status(200).json(BaseApiResponse("Slot parkir berhasil diambil", ParkingSlotResponse(slotData)));
     } catch (error) {
         console.error(error);
-        res.status(500).json(BaseApiResponse("Failed to retrieve parking slot", null));
+        res.status(500).json(BaseApiResponse("Gagal mengambil slot parkir", null));
     }
 };
 
-// Controller to update parking slot's occupancy status and reserved_by user
+// Controller untuk memperbarui status slot parkir dan pengguna yang memesan
 exports.updateParkingSlotStatus = async (req, res) => {
     const { id } = req.params;
     const { is_occupied, reserved_by } = req.body;
@@ -55,18 +55,18 @@ exports.updateParkingSlotStatus = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json(BaseApiResponse("Parking slot not found", null));
+            return res.status(404).json(BaseApiResponse("Slot parkir tidak ditemukan", null));
         }
 
         const slotData = result.rows[0];
-        res.status(200).json(BaseApiResponse("Parking slot status updated", ParkingSlotResponse(slotData)));
+        res.status(200).json(BaseApiResponse("Status slot parkir berhasil diperbarui", ParkingSlotResponse(slotData)));
     } catch (error) {
         console.error(error);
-        res.status(500).json(BaseApiResponse("Failed to update parking slot status", null));
+        res.status(500).json(BaseApiResponse("Gagal memperbarui status slot parkir", null));
     }
 };
 
-// Controller to delete a parking slot by ID
+// Controller untuk menghapus slot parkir berdasarkan ID
 exports.deleteParkingSlotById = async (req, res) => {
     const { id } = req.params;
 
@@ -77,17 +77,17 @@ exports.deleteParkingSlotById = async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json(BaseApiResponse("Parking slot not found", null));
+            return res.status(404).json(BaseApiResponse("Slot parkir tidak ditemukan", null));
         }
 
-        res.status(200).json(BaseApiResponse("Parking slot deleted successfully", null));
+        res.status(200).json(BaseApiResponse("Slot parkir berhasil dihapus", null));
     } catch (error) {
         console.error(error);
-        res.status(500).json(BaseApiResponse("Failed to delete parking slot", null));
+        res.status(500).json(BaseApiResponse("Gagal menghapus slot parkir", null));
     }
 };
 
-// Controller to get all parking slots
+// Controller untuk mengambil semua slot parkir
 exports.getAllParkingSlots = async (req, res) => {
     try {
         const result = await pool.query(
@@ -100,10 +100,10 @@ exports.getAllParkingSlots = async (req, res) => {
         const parkingSlots = result.rows.reduce((acc, row) => {
             const slot = acc.find(s => s.id === row.id);
             if (slot) {
-                // Append additional bicycle to existing parking slot
+                // Tambahkan ID sepeda tambahan ke slot parkir yang ada
                 if (row.bicycle_id) slot.bicycles.push(row.bicycle_id);
             } else {
-                // Initialize new parking slot with bicycle list
+                // Inisialisasi slot parkir baru dengan daftar sepeda
                 acc.push({
                     ...row,
                     bicycles: row.bicycle_id ? [row.bicycle_id] : []
@@ -112,9 +112,9 @@ exports.getAllParkingSlots = async (req, res) => {
             return acc;
         }, []);
 
-        res.status(200).json(BaseApiResponse("Parking slots retrieved successfully", parkingSlots.map(ParkingSlotResponse)));
+        res.status(200).json(BaseApiResponse("Semua slot parkir berhasil diambil", parkingSlots.map(ParkingSlotResponse)));
     } catch (error) {
         console.error(error);
-        res.status(500).json(BaseApiResponse("Failed to retrieve parking slots", null));
+        res.status(500).json(BaseApiResponse("Gagal mengambil semua slot parkir", null));
     }
 };

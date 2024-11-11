@@ -48,9 +48,9 @@ exports.BicycleResponse = (bikeData) => ({
         id: bikeData.owner_id,
         name: bikeData.owner_name
     },
-    isLocked: bikeData.isLocked,
+    isLocked: bikeData.is_locked,
     parkingSlotId: bikeData.parking_slot_id, // ID slot parkir saat ini
-    qrCode: bikeData.qrCode // ID QR code terkait sepeda
+    qrCode: bikeData.qr_code // ID QR code terkait sepeda
 });
 
 // Respon untuk Sistem Monitoring

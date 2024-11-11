@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { BaseApiResponse } = require('../config/utils');
+const { BaseApiResponse, BicycleResponse } = require('../config/utils');  // Impor dengan benar
 
 
 // Controller to create a new bicycle
@@ -11,7 +11,7 @@ exports.createBicycle = async (req, res) => {
             [owner_id, parking_slot_id, qr_code]
         );
         const bikeData = result.rows[0];
-        res.status(201).json(BaseApiResponse("Bicycle created successfully", BicycleResponse(bikeData)));
+        res.status(201).json(BaseApiResponse("Bicycle created successfully", BicycleResponse(bikeData)));  // Pastikan BicycleResponse digunakan di sini
     } catch (error) {
         console.error(error);
         res.status(500).json(BaseApiResponse("Failed to create bicycle", null));

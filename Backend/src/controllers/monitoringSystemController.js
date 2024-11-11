@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-const { BaseApiResponse } = require('../config/utils');
+const { BaseApiResponse, MonitoringSystemResponse  } = require('../config/utils');
 
 // Controller to get the status of the monitoring system
 exports.getSystemStatus = async (req, res) => {
@@ -11,7 +11,15 @@ exports.getSystemStatus = async (req, res) => {
         }
 
         const monitorData = result.rows[0];
-        res.status(200).json(BaseApiResponse("Monitoring system status retrieved successfully", MonitoringSystemResponse(monitorData)));
+        // Format the response to include status, active_slots, available_slots, recent_activity
+        const formattedResponse = {
+            status: monitorData.status,
+            activeSlots: monitorData.active_slots,
+            availableSlots: monitorData.available_slots,
+            recentActivity: monitorData.recent_activity
+        };
+        
+        res.status(200).json(BaseApiResponse("Monitoring system status retrieved successfully", formattedResponse));
     } catch (error) {
         console.error(error);
         res.status(500).json(BaseApiResponse("Failed to retrieve monitoring system status", null));
