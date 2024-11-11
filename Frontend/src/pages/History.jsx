@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const History  = () => {
+const History = () => {
   const parkingData = [
     { date: '12 October 2024', duration: '1 Hours 30 Minutes', time: '09.30–11.00' },
     { date: '11 October 2024', duration: '1 Hours 30 Minutes', time: '09.30–11.00' },
@@ -17,7 +18,7 @@ const History  = () => {
           </div>
           <span className="font-semibold">Username</span>
         </div>
-        <a href="#" className="font-semibold text-gray-700">Home</a>
+        <Link to="/home" className="font-semibold text-gray-700">Home</Link>
       </div>
 
       {/* Recent Parking */}

@@ -19,26 +19,42 @@ const Home = () => {
     console.error(err);
   };
 
+  // Handler untuk tombol History
+  const handleHistoryClick = () => {
+    navigate("/history");
+  };
+
+  // Handler untuk tombol Log Out
+  const handleLogoutClick = () => {
+    navigate("/login");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="flex justify-between p-4 bg-white shadow-md">
-        <h2 className="text-2xl font-bold">BIKEGUARD</h2>
-        <button className="text-blue-500">Logout</button>
+    <div className="min-h-screen flex flex-col items-center bg-blue-50">
+      {/* Navbar */}
+      <div className="w-full flex justify-between items-center p-4 bg-white shadow-md border-b border-purple-500">
+        <h2 className="text-2xl font-bold text-blue-600">BikeGuard</h2>
+        <div className="flex items-center space-x-4">
+          <span className="font-semibold">Username</span>
+          <button onClick={handleHistoryClick} className="text-gray-600">History</button>
+          <button onClick={handleLogoutClick} className="text-gray-600">Log Out</button>
+        </div>
       </div>
-      <div className="flex flex-col items-center justify-center h-full">
-        <h3 className="text-xl mb-4">Scan QR Code to lock Bike</h3>
 
-        {/* Tombol untuk memunculkan scanner */}
-        {!showScanner && (
-          <button
-            className="px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg"
-            onClick={() => setShowScanner(true)}
-          >
-            Scan QR Code
-          </button>
-        )}
+      {/* Main Content */}
+      <div className="flex flex-col items-center justify-center flex-grow">
+        <h1 className="text-4xl font-bold mb-6">WELCOME</h1>
+        <img src="path-to-your-bike-image.png" alt="Bike" className="w-48 mb-6" /> {/* Replace with actual image path */}
+        
+        {/* Park Button */}
+        <button
+          className="px-8 py-3 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition"
+          onClick={() => setShowScanner(true)}
+        >
+          PARK NOW
+        </button>
 
-        {/* Scanner QR muncul jika tombol di klik */}
+        {/* QR Scanner */}
         {showScanner && (
           <div className="w-72 h-72 mt-4">
             <QrReader

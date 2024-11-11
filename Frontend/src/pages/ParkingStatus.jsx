@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const ParkingStatus = () => {
     return (
@@ -12,12 +13,12 @@ const ParkingStatus = () => {
                     <span className="text-lg font-medium">Username</span>
                 </div>
                 <nav className="flex space-x-8">
-                    <a href="#history" className="text-gray-700 hover:text-black font-medium">
+                    <Link to="/history" className="text-gray-700 hover:text-black font-medium">
                         History
-                    </a>
-                    <a href="#home" className="text-gray-700 hover:text-black font-medium">
+                    </Link>
+                    <Link to="/home" className="text-gray-700 hover:text-black font-medium">
                         Home
-                    </a>
+                    </Link>
                 </nav>
             </header>
 

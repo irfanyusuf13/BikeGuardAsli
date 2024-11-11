@@ -1,6 +1,7 @@
 #include <ESP32Servo.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include <HttpClient.h>
 
 const char ssid[] = "Wokwi-GUEST";
 const char password[] = "";
@@ -77,6 +78,31 @@ void lockControlTask(void *pvParameters) {
   }
 }
 
+void vDataUploadTask(void *pvParameters) {
+  while (1) {
+    if (WiFi.status() == WL_CONNECTED) {
+      HTTPClient http;
+      http.begin("http://server-url/upload_data"); // ganti dengan URL server
+
+      // Buat data JSON dengan status lock dan waktu parkir
+      String data = "{\"isLocked\": " + String(isLocked) + ", \"duration\": " + String(counter) + "}";
+
+      http.addHeader("Content-Type", "application/json");
+      int httpResponseCode = http.POST(data);
+
+      if (httpResponseCode > 0) {
+        Serial.println("Data uploaded to server");
+      } else {
+        Serial.println("Data upload failed");
+      }
+      http.end();
+    }
+    vTaskDelay(pdMS_TO_TICKS(10000)); // Upload setiap 10 detik
+  }
+}
+
+
+
 void setup() {
   Serial.begin(115200);
   myservo.attach(pinServo);  
@@ -95,6 +121,7 @@ void setup() {
   xTaskCreate(vTimerTask, "TimerTask", 1000, NULL, 1, NULL);
   xTaskCreate(sensorTask, "SensorTask", 1000, NULL, 1, NULL);
   xTaskCreate(lockControlTask, "LockControlTask", 1000, NULL, 1, NULL);
+  xTaskCreate(vDataUploadTask, "DataUploadTask", 1000, NULL, 1, NULL);
 
 
   WiFi.begin(ssid, password);
