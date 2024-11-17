@@ -1,41 +1,46 @@
 #include <ESP32Servo.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <HttpClient.h>
-
 const char ssid[] = "Wokwi-GUEST";
 const char password[] = "";
 
-Servo myservo;         // Object servo untuk mengontrol servo
-bool isLocked = false; // Status kunci
-int pos = 0;           // Variabel untuk posisi servo
-int counter = 0;       // Counter untuk durasi kunci
+Servo myservo;
+bool isLocked = false;
+int pos = 0;
+int counter = 0;
 int pinServo = 13;
-int triggerPin = 12;
-int echoPin = 14;
+int triggerPin = 32;
+int echoPin = 34;
 int buzzer = 15;
+int buttonPin = 25; // Pin untuk button
 long duration;
 float distance;
+bool isBikePresent = false; // Variabel untuk mendeteksi keberadaan sepeda
 
 SemaphoreHandle_t mutex = NULL;
 
-// Task untuk menghitung waktu kunci otomatis terbuka setelah 10 detik
+// Variabel untuk debounce button
+int buttonState = LOW;
+int lastButtonState = LOW;
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 50;
+
 void vTimerTask(void *pvParameters) {
   for (;;) {
     if (isLocked) {
       counter++;
-      if (counter == 10) { // Setelah 10 detik, buka kunci
+      if (counter == 10) { // Setelah 10 detik, buka kunci otomatis
         xSemaphoreTake(mutex, portMAX_DELAY);
         isLocked = false;
-        xSemaphoreGive(mutex);
         counter = 0;
+        xSemaphoreGive(mutex);
       }
     }
     vTaskDelay(1000 / portTICK_PERIOD_MS);
   }
 }
 
-// Task untuk membaca sensor ultrasonic
+// Task untuk membaca sensor ultrasonic dan mendeteksi sepeda
 void sensorTask(void *pvParameters) {
   for (;;) {
     digitalWrite(triggerPin, LOW);
@@ -44,24 +49,55 @@ void sensorTask(void *pvParameters) {
     delayMicroseconds(10);
     digitalWrite(triggerPin, LOW);
 
-    
     duration = pulseIn(echoPin, HIGH);
-    distance = duration * 0.034 / 2; /
-    
+    distance = duration * 0.034 / 2; // Menghitung jarak
+
     Serial.print("Distance: ");
     Serial.println(distance);
 
-    if (distance < 10) { 
+    // Ambang batas jarak untuk mendeteksi sepeda (misalnya 10 cm)
+    if (distance < 10) {
       xSemaphoreTake(mutex, portMAX_DELAY);
-      isLocked = true;
+      isBikePresent = true; // Sepeda terdeteksi
+      xSemaphoreGive(mutex);
+    } else {
+      xSemaphoreTake(mutex, portMAX_DELAY);
+      isBikePresent = false; // Sepeda tidak terdeteksi
       xSemaphoreGive(mutex);
     }
-    
-    vTaskDelay(500 / portTICK_PERIOD_MS); 
+
+    vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
 
+// Task untuk membaca tombol dan mengontrol lock/unlock
+void buttonTask(void *pvParameters) {
+  for (;;) {
+    int reading = digitalRead(buttonPin);
 
+    if (reading != lastButtonState) {
+      lastDebounceTime = millis();
+    }
+
+    if ((millis() - lastDebounceTime) > debounceDelay) {
+      if (reading != buttonState) {
+        buttonState = reading;
+
+        if (buttonState == HIGH) {
+          xSemaphoreTake(mutex, portMAX_DELAY);
+          isLocked = !isLocked; // Toggle lock/unlock
+          xSemaphoreGive(mutex);
+        }
+      }
+    }
+
+    lastButtonState = reading;
+
+    vTaskDelay(50 / portTICK_PERIOD_MS);
+  }
+}
+
+// Task untuk mengontrol servo dan buzzer
 void lockControlTask(void *pvParameters) {
   for (;;) {
     xSemaphoreTake(mutex, portMAX_DELAY);
@@ -78,38 +114,13 @@ void lockControlTask(void *pvParameters) {
   }
 }
 
-void vDataUploadTask(void *pvParameters) {
-  while (1) {
-    if (WiFi.status() == WL_CONNECTED) {
-      HTTPClient http;
-      http.begin("http://server-url/upload_data"); // ganti dengan URL server
-
-      // Buat data JSON dengan status lock dan waktu parkir
-      String data = "{\"isLocked\": " + String(isLocked) + ", \"duration\": " + String(counter) + "}";
-
-      http.addHeader("Content-Type", "application/json");
-      int httpResponseCode = http.POST(data);
-
-      if (httpResponseCode > 0) {
-        Serial.println("Data uploaded to server");
-      } else {
-        Serial.println("Data upload failed");
-      }
-      http.end();
-    }
-    vTaskDelay(pdMS_TO_TICKS(10000)); // Upload setiap 10 detik
-  }
-}
-
-
-
 void setup() {
   Serial.begin(115200);
   myservo.attach(pinServo);  
   pinMode(triggerPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(buzzer, OUTPUT);
-
+  pinMode(buttonPin, INPUT_PULLUP); // Gunakan INPUT_PULLUP untuk button
 
   mutex = xSemaphoreCreateMutex();
   if (mutex == NULL) {
@@ -117,12 +128,10 @@ void setup() {
     while (1);
   }
 
-  
   xTaskCreate(vTimerTask, "TimerTask", 1000, NULL, 1, NULL);
   xTaskCreate(sensorTask, "SensorTask", 1000, NULL, 1, NULL);
+  xTaskCreate(buttonTask, "ButtonTask", 1000, NULL, 1, NULL);
   xTaskCreate(lockControlTask, "LockControlTask", 1000, NULL, 1, NULL);
-  xTaskCreate(vDataUploadTask, "DataUploadTask", 1000, NULL, 1, NULL);
-
 
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
@@ -133,4 +142,10 @@ void setup() {
 }
 
 void loop() {
+  if (isBikePresent) {
+    Serial.println("Sepeda terdeteksi di lokasi parkir.");
+  } else {
+    Serial.println("Lokasi parkir kosong.");
+  }
+  delay(1000); 
 }
