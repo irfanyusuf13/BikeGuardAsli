@@ -1,7 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 const BikeInLock = () => {
+    const [isUnlocked, setIsUnlocked] = useState(false);
+
+    const handleUnlock = () => {
+        setIsUnlocked(true); // Mengubah status ke unlocked
+    };
+
     return (
         <div className="min-h-screen bg-blue-100 flex flex-col">
             {/* Header */}
@@ -22,11 +28,14 @@ const BikeInLock = () => {
                 <img src="https://img.icons8.com/ios-filled/100/000000/lock--v1.png" alt="Lock Icon" className="mb-4" />
                 <p className="text-center font-semibold mb-2">Your bicycle is currently parked.</p>
                 
-                <button className="bg-gray-400 text-white py-2 px-6 rounded-full shadow-md mb-2">
-                    UNLOCK
+                <button
+                    onClick={handleUnlock}
+                    className="bg-gray-400 text-white py-2 px-6 rounded-full shadow-md mb-2"
+                >
+                    {isUnlocked ? "UNLOCKED" : "UNLOCK"}
                 </button>
                 
-                <p className="text-gray-600">Your Bike Is Locked</p>
+                <p className="text-gray-600">{isUnlocked ? "Your bike is unlocked!" : "Your Bike Is Locked"}</p>
             </div>
         </div>
     );

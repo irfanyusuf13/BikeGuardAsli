@@ -1,15 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Register = () => {
+  const [role, setRole] = useState("user");
+
+  const handleRoleChange = (event) => {
+    setRole(event.target.value);
+  };
+
   return (
     <section className="flex min-h-screen">
       {/* Bagian Kiri dengan Warna Background #ADD8E6 */}
       <div className="hidden md:flex w-1/2 bg-[#ADD8E6] items-center justify-center">
-        <img
-          src="https://via.placeholder.com/200" // Ganti dengan URL gambar yang sebenarnya
-          alt="Lock Icon"
-          className="w-48 h-48"
-        />
       </div>
 
       {/* Bagian Kanan - Form Register */}
@@ -42,11 +43,26 @@ const Register = () => {
               className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
             />
           </div>
+
+          {/* Dropdown Pilihan Role */}
+          <div>
+            <label className="block text-gray-700 font-semibold">Select Role</label>
+            <select
+              id="role"
+              value={role}
+              onChange={handleRoleChange}
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
           <button
             type="submit"
             className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
           >
-            REGISTER
+            Register as {role === "admin" ? "Admin" : "User"}
           </button>
         </form>
       </div>

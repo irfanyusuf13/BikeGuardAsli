@@ -1,7 +1,13 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const ParkingStatus = () => {
+    const navigate = useNavigate(); // Hook untuk navigasi
+
+    const handleParkNow = () => {
+        navigate("/home"); // Arahkan ke halaman Home
+    };
+
     return (
         <div className="min-h-screen bg-blue-100">
             {/* Header */}
@@ -32,7 +38,12 @@ const ParkingStatus = () => {
                         <span className="font-medium text-gray-800">Parking 1</span>
                         <div className="flex items-center space-x-4">
                             <span className="text-green-600 font-medium">Available</span>
-                            <button className="text-blue-600 font-semibold hover:underline">Park Now</button>
+                            <button 
+                                onClick={handleParkNow} // Tambahkan handler navigasi
+                                className="text-blue-600 font-semibold hover:underline"
+                            >
+                                Park Now
+                            </button>
                         </div>
                     </div>
 

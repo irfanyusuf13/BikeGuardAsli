@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 
 const Login = () => {
+  const [role, setRole] = useState("user");
+
+  const handleRoleChange = (event) => {
+    setRole(event.target.value);
+  };
+
   return (
     <section className="flex min-h-screen">
       {/* Bagian Kiri - Form Login */}
@@ -11,6 +17,7 @@ const Login = () => {
         <h1 className="text-2xl font-extrabold text-gray-800 mb-2">
           Log In to Your Account
         </h1>
+
         <form className="space-y-6 w-full max-w-sm">
           <div>
             <label
@@ -44,12 +51,33 @@ const Login = () => {
               required
             />
           </div>
+
+          {/* Dropdown Pilihan Role */}
+          <div>
+            <label
+              htmlFor="role"
+              className="block mb-2 text-sm font-medium text-gray-700"
+            >
+              Select Role
+            </label>
+            <select
+              id="role"
+              value={role}
+              onChange={handleRoleChange}
+              className="w-full p-3 border rounded-lg text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-5 py-3"
           >
-            Log In
+            Log In as {role === "admin" ? "Admin" : "User"}
           </button>
+
           <p className="text-sm text-gray-500 mt-4">
             Don’t have an account?{" "}
             <a href="register" className="text-blue-600 hover:underline">
@@ -61,11 +89,6 @@ const Login = () => {
 
       {/* Bagian Kanan - Gambar Sepeda dengan Warna Background #ADD8E6 */}
       <div className="w-1/2 flex items-center justify-center bg-[#ADD8E6] relative">
-        <img
-          src="https://www.shutterstock.com/image-vector/colorful-cartoon-bicycle-simple-design-260nw-1724445172.jpg"
-          alt="Bicycle"
-          className="w-3/4 h-auto"
-        />
         <div className="absolute bottom-10 text-center">
           <h2 className="text-xl font-semibold text-blue-600">
             Manage your tasks with BikeGuard
