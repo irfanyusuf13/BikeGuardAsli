@@ -2,7 +2,7 @@ const pool = require('../config/database');
 const { BaseApiResponse } = require('../config/utils');
 
 // Controller untuk membuat admin (pengguna dengan role admin)
-exports.createAdmin = async (req, res) => {
+exports.registerAdmin = async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
@@ -20,6 +20,24 @@ exports.createAdmin = async (req, res) => {
         res.status(500).json(BaseApiResponse(error.message, null));
     }
 };
+
+exports.loginAdmin = async (req, res) => {
+    const { email, password, role } = req.body;
+
+    try {
+        const result = await pool.query(`SELECT * FROM users WHERE email = $1 AND password = $2 AND role = $3`, [email, password, role]);
+
+        if(result.rows.length == 0) 
+            return res.status(404).json(BaseApiResponse('User Not Found', null));
+        
+        return res.status(200).json(BaseApiResponse("Login Succesful", result.rows[0])); // Mengembalikan data user yang baru ditambahkan
+    } 
+    
+    catch (error) {
+        console.log(error);
+        return res.status(500).json(BaseApiResponse(error.message, null));
+    }
+}
 
 // Controller untuk mendapatkan semua pengguna dengan role 'admin'
 exports.getAllAdmins = async (req, res) => {

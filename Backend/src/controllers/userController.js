@@ -7,8 +7,8 @@ exports.register = async (req, res) => {
 
     try {
         const result = await pool.query(
-            `INSERT INTO users (name, email, password) VALUES ($1, $2, $3)
-             RETURNING *`, 
+            `INSERT INTO users (name, email, password, role)
+             VALUES ($1, $2, $3, 'user') RETURNING *`,
              [name, email, password]
             );
 
@@ -22,22 +22,27 @@ exports.register = async (req, res) => {
 };
 
 exports.login = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body; // Menambahkan role ke body request
 
     try {
-        const result = await pool.query(`SELECT * FROM users WHERE email = $1 AND password = $2`, [email, password]);
+        // Query untuk memeriksa email, password, dan role
+        const result = await pool.query(
+            `SELECT * FROM users WHERE email = $1 AND password = $2 AND role = $3`, 
+            [email, password, role]
+        );
 
-        if(result.rows.length == 0) 
-            return res.status(404).json(BaseApiResponse('User Not Found', null));
-        
-        return res.status(200).json(BaseApiResponse("Login Succesful", result.rows[0])); // Mengembalikan data user yang baru ditambahkan
+        // Jika tidak ditemukan user yang sesuai
+        if (result.rows.length === 0) 
+            return res.status(404).json(BaseApiResponse('User Not Found or Role Mismatch', null));
+
+        // Jika ditemukan, kembalikan data user
+        return res.status(200).json(BaseApiResponse("Login Successful", result.rows[0]));
     } 
-    
     catch (error) {
         console.log(error);
         return res.status(500).json(BaseApiResponse(error.message, null));
     }
-}
+};
 
 // Controller untuk menghapus pengguna berdasarkan ID
 exports.deleteUserById = async (req, res) => {

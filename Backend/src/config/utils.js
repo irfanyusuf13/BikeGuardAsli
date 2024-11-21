@@ -1,62 +1,49 @@
+// Utility untuk format respons API dasar
 exports.BaseApiResponse = (message, data) => ({
     message: message,
-    data: data
+    data: data,
 });
 
-// Respon untuk User
+// Respons untuk User
 exports.UserResponse = (userData) => ({
     id: userData.id,
     name: userData.name,
     email: userData.email,
-    role: userData.role, // Misalnya: user atau admin
-    qrCodes: userData.qrCodes, // ID QR code yang dimiliki oleh pengguna
-    bicycles: userData.bicycles // ID sepeda yang dimiliki oleh pengguna
+    role: userData.role, // Role user: 'user' atau 'admin'
+    qrCodes: userData.qrCodes || [], // QR codes milik user
 });
 
-// Respon untuk Admin
+// Respons untuk Admin
 exports.AdminResponse = (adminData) => ({
     id: adminData.id,
     name: adminData.name,
     email: adminData.email,
     role: 'admin',
-    permissions: adminData.permissions // Hak akses admin
+    permissions: adminData.permissions || [], // Hak akses admin
 });
 
-// Respon untuk QR Code
-exports.QRCodeResponse = (qrData) => {
-    return {
-        id: qrData.id,
-        code: qrData.code,
-        expiration_date: qrData.expiration_date,
-        associated_parking_slot: qrData.associated_parking_slot
-    };
-};
+// Respons untuk QR Code
+exports.QRCodeResponse = (qrData) => ({
+    id: qrData.id,
+    code: qrData.code,
+    isValid: qrData.isValid, // Status validitas QR code
+    expirationDate: qrData.expiration_date,
+    associatedParkingSlot: qrData.associated_parking_slot, // ID slot parkir yang terkait
+});
 
-// Respon untuk Slot Parkir
+// Respons untuk Slot Parkir
 exports.ParkingSlotResponse = (slotData) => ({
     id: slotData.id,
     location: slotData.location,
     isOccupied: slotData.isOccupied,
     reservedBy: slotData.reservedBy, // ID pengguna yang memesan slot
-    bicycles: slotData.bicycles // ID sepeda yang terparkir di slot ini
 });
 
-// Respon untuk Sepeda
-exports.BicycleResponse = (bikeData) => ({
-    id: bikeData.id,
-    owner: {
-        id: bikeData.owner_id,
-        name: bikeData.owner_name
-    },
-    isLocked: bikeData.is_locked,
-    parkingSlotId: bikeData.parking_slot_id, // ID slot parkir saat ini
-    qrCode: bikeData.qr_code // ID QR code terkait sepeda
-});
-
-// Respon untuk Sistem Monitoring
+// Respons untuk Sistem Monitoring
 exports.MonitoringSystemResponse = (monitorData) => ({
-    systemStatus: monitorData.status,
-    activeSlots: monitorData.activeSlots,
-    availableSlots: monitorData.availableSlots,
-    recentActivity: monitorData.recentActivity // Aktivitas terkini dalam sistem
+    id: monitorData.id, // ID sistem monitoring
+    systemStatus: monitorData.status, // Status sistem (contoh: aktif/nonaktif)
+    activeSlots: monitorData.activeSlots, // Jumlah slot aktif
+    availableSlots: monitorData.availableSlots, // Jumlah slot tersedia
+    recentActivity: monitorData.recentActivity || "", // Aktivitas terkini
 });

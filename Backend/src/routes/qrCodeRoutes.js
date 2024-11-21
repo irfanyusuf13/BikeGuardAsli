@@ -5,6 +5,7 @@ const QrCodeController = require('../controllers/qrCodeController');
 
 // QrCode Routes
 router.post('/create', QrCodeController.createQRCode);
+router.post('/verify', QrCodeController.verifyQRCode);
 router.get('/all', QrCodeController.getAllQRCodes);
 router.get('/:id', QrCodeController.getQRCodeById);
 router.put('/update/:id', QrCodeController.updateQRCode);

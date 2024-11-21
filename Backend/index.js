@@ -13,7 +13,6 @@ app.use(cors());
 // Import routes
 
 const AdminRoutes = require('./src/routes/adminRoutes');
-const BicycleRoutes = require('./src/routes/bicycleRoutes');
 const ParkingSlotRoutes = require('./src/routes/parkingSlotRoutes');
 const QrCodeRoutes = require('./src/routes/qrCodeRoutes');
 const UserRoutes = require('./src/routes/userRoutes');
@@ -23,7 +22,6 @@ const MonitorRoutes = require('./src/routes/monitoringSystemRoutes');
 
 app.use('/user', UserRoutes);
 app.use('/admin', AdminRoutes);
-app.use('/bicycle', BicycleRoutes);
 app.use('/parking-slot', ParkingSlotRoutes);
 app.use('/qr-code', QrCodeRoutes);
 app.use('/monitor', MonitorRoutes);
