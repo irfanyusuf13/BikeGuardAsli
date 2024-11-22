@@ -3,23 +3,26 @@ const { BaseApiResponse } = require('../config/utils');
 
 // Controller untuk membuat admin (pengguna dengan role admin)
 exports.registerAdmin = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
+
+    if (role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied: Invalid role for admin registration' });
+    }
 
     try {
-        // Menyimpan admin dengan role 'admin' di dalam tabel users
         const result = await pool.query(
             `INSERT INTO users (name, email, password, role)
-             VALUES ($1, $2, $3, 'admin') RETURNING *`, 
+             VALUES ($1, $2, $3, 'admin') RETURNING *`,
             [name, email, password]
         );
-        
+
         res.status(200).json(BaseApiResponse('Successfully created admin', result.rows[0]));
-    } 
-    catch (error) {
-        console.log(error);
+    } catch (error) {
+        console.error(error);
         res.status(500).json(BaseApiResponse(error.message, null));
     }
 };
+
 
 exports.loginAdmin = async (req, res) => {
     const { email, password, role } = req.body;

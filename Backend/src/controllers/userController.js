@@ -3,23 +3,26 @@ const { BaseApiResponse } = require('../config/utils');
 
 // Controller untuk membuat pengguna baru
 exports.register = async (req, res) => {
-    const { name, email, password } =  req.body;
+    const { name, email, password, role } = req.body;
+
+    if (role && role !== 'user') {
+        return res.status(403).json({ message: 'Access denied: Invalid role for user registration' });
+    }
 
     try {
         const result = await pool.query(
             `INSERT INTO users (name, email, password, role)
              VALUES ($1, $2, $3, 'user') RETURNING *`,
-             [name, email, password]
-            );
+            [name, email, password]
+        );
 
-        res.status(200).json(BaseApiResponse('Succesfully Create User', result.rows[0]));
-    } 
-    
-    catch (error) {
-        console.log(error);
+        res.status(200).json(BaseApiResponse('Successfully created user', result.rows[0]));
+    } catch (error) {
+        console.error(error);
         res.status(500).json(BaseApiResponse(error.message, null));
     }
 };
+
 
 exports.login = async (req, res) => {
     const { email, password, role } = req.body; // Menambahkan role ke body request
