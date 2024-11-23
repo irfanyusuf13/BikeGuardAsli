@@ -6,6 +6,8 @@ import Register from "./pages/Register";
 import BikeInUse from "./pages/BikeInUse";
 import ParkingStatus from "./pages/ParkingStatus";
 import History from "./pages/History";
+import AdminPage from "./pages/AdminPage";
+import AdminManageParking from "./pages/AdminManageParking";
 import "./App.css";
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
         <Route path="/bike-in-use" element={<BikeInUse />} />
         <Route path="/parking-status" element={<ParkingStatus />} />
         <Route path="/history" element={<History />} />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin-manage-parking" element={<AdminManageParking />} />
       </Routes>
     </Router>
   );

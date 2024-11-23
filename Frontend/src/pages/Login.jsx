@@ -35,8 +35,12 @@ const Login = () => {
         localStorage.setItem("userRole", data.role);
         localStorage.setItem("userName", data.name); // Tambahkan ini
   
-        // Navigasi ke halaman Home setelah login berhasil
-        navigate("/home");
+        // Navigasi berdasarkan peran pengguna
+        if (data.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/home");
+        }
       } else {
         setError("Login failed: Invalid response from server.");
       }
