@@ -169,3 +169,46 @@ exports.deleteParkingSlotById = async (req, res) => {
         res.status(500).json(BaseApiResponse("Gagal menghapus slot parkir", null));
     }
 };
+
+// Controller untuk mengambil detail slot parkir berdasarkan ID
+exports.getParkingSlotById = async (req, res) => {
+    const { id } = req.params;  // Mengambil ID dari parameter URL
+
+    try {
+        // Query untuk mendapatkan slot parkir berdasarkan ID
+        const result = await pool.query(
+            `SELECT parking_slots.*, 
+                    users.name AS reservedBy, 
+                    CASE 
+                        WHEN parking_slots.reserved_by IS NOT NULL THEN 'Unavailable' 
+                        ELSE 'Available' 
+                    END AS status
+            FROM parking_slots
+            LEFT JOIN users ON parking_slots.reserved_by = users.id
+            WHERE parking_slots.id = $1`,
+            [id]
+        );
+
+        // Jika slot parkir tidak ditemukan
+        if (result.rows.length === 0) {
+            return res.status(404).json(BaseApiResponse("Slot parkir tidak ditemukan", null));
+        }
+
+        const slotData = result.rows[0];
+
+        // Format data sebelum mengirimkan respons
+        const responseData = {
+            id: slotData.id,
+            location: slotData.location,
+            isOccupied: slotData.is_occupied,
+            reservedBy: slotData.reservedBy,
+            status: slotData.status
+        };
+
+        res.status(200).json(BaseApiResponse("Detail slot parkir berhasil diambil", responseData));
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(BaseApiResponse("Gagal mengambil detail slot parkir", null));
+    }
+};
+

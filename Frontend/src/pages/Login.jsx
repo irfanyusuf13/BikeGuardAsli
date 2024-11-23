@@ -1,10 +1,51 @@
 import React, { useState } from "react";
+import axios from "axios"; // Untuk melakukan permintaan ke API
+import { useNavigate } from "react-router-dom"; // Untuk navigasi setelah login berhasil
 
 const Login = () => {
   const [role, setRole] = useState("user");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const navigate = useNavigate();
 
   const handleRoleChange = (event) => {
     setRole(event.target.value);
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(""); // Reset error sebelum mencoba login
+  
+    try {
+      const response = await axios.post("http://localhost:3000/user/login", {
+        email,
+        password,
+        role,
+      });
+  
+      const { data } = response.data;
+  
+      if (data && data.id) {
+        // Simpan data pengguna ke localStorage
+        localStorage.setItem("userId", data.id);
+        localStorage.setItem("userRole", data.role);
+        localStorage.setItem("userName", data.name); // Tambahkan ini
+  
+        // Navigasi ke halaman Home setelah login berhasil
+        navigate("/home");
+      } else {
+        setError("Login failed: Invalid response from server.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Login failed: Invalid email, password, or role.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -18,20 +59,22 @@ const Login = () => {
           Log In to Your Account
         </h1>
 
-        <form className="space-y-6 w-full max-w-sm">
+        <form className="space-y-6 w-full max-w-sm" onSubmit={handleLogin}>
           <div>
             <label
-              htmlFor="username"
+              htmlFor="email"
               className="block mb-2 text-sm font-medium text-gray-700"
             >
-              Username
+              Email
             </label>
             <input
-              type="text"
-              name="username"
-              id="username"
-              placeholder="Enter your username"
+              type="email"
+              name="email"
+              id="email"
+              placeholder="Enter your email"
               className="w-full p-3 border rounded-lg text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -48,6 +91,8 @@ const Login = () => {
               id="password"
               placeholder="••••••••"
               className="w-full p-3 border rounded-lg text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
@@ -74,9 +119,12 @@ const Login = () => {
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-5 py-3"
+            disabled={isLoading}
           >
-            Log In as {role === "admin" ? "Admin" : "User"}
+            {isLoading ? "Logging In..." : `Log In as ${role}`}
           </button>
+
+          {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
           <p className="text-sm text-gray-500 mt-4">
             Don’t have an account?{" "}

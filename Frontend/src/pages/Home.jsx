@@ -1,31 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { QrReader } from "react-qr-reader";
+import axios from "axios";
 
 const Home = () => {
   const [qrData, setQrData] = useState(null);
   const [showScanner, setShowScanner] = useState(false);
-  const [error, setError] = useState(null); // State untuk menangkap error
-  const [showLogoutModal, setShowLogoutModal] = useState(false); // State untuk modal logout
-  const [loading, setLoading] = useState(false); // State untuk animasi loading
+  const [error, setError] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("Guest"); // Default ke "Guest"
   const navigate = useNavigate();
 
+  // Ambil username dari localStorage saat halaman dimuat
+  useEffect(() => {
+    const fetchUserData = () => {
+      const name = localStorage.getItem("userName");
+      if (name) {
+        setUsername(name);
+      } else {
+        setUsername("Guest");
+      }
+    };
+    fetchUserData();
+  }, []);
+
+  // Fungsi untuk menangani hasil scan QR Code
   const handleScan = (data) => {
     if (data && data !== qrData) {
-      setQrData(data); // Set QR data jika data baru
-      alert(`QR Code Scanned: ${data}`);
-      navigate("/bike-in-use");
+      setQrData(data);
+      verifyQRCode(data); // Panggil fungsi verifikasi
     }
   };
 
-  const handleSimulatedScan = () => {
-    const mockData = "Simulated QR Code Data"; // Data simulasi
-    handleScan(mockData);
+  // Fungsi untuk memverifikasi QR Code
+  const verifyQRCode = (scannedCode) => {
+    setError(null); // Reset error
+    axios
+      .post("http://localhost:3000/qr-code/verify", { code: scannedCode })
+      .then((response) => {
+        const { message, data } = response.data;
+
+        if (message === "QR Code is valid" && data.associatedParkingSlot) {
+          // Simpan parkingSlotId ke localStorage
+          localStorage.setItem("parkingSlotId", data.associatedParkingSlot);
+          // Navigasi ke halaman BikeInUse
+          navigate("/bike-in-use");
+        } else {
+          setError("QR Code valid tetapi tidak terkait dengan slot parkir.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error during QR code verification:", error);
+        setError("Gagal memverifikasi QR Code. Silakan coba lagi.");
+      });
   };
 
+  // Fungsi untuk menangani error saat memindai QR Code
   const handleError = (err) => {
     console.error(err);
-    setError("An error occurred while scanning. Please try again.");
+    setError("Terjadi kesalahan saat memindai QR Code. Silakan coba lagi.");
   };
 
   const handleHistoryClick = () => {
@@ -33,20 +67,21 @@ const Home = () => {
   };
 
   const handleLogoutClick = () => {
-    setShowLogoutModal(true); // Tampilkan modal konfirmasi
+    setShowLogoutModal(true);
   };
 
   const confirmLogout = () => {
-    setLoading(true); // Tampilkan loading spinner
+    setLoading(true);
     setTimeout(() => {
       setLoading(false);
       setShowLogoutModal(false);
+      localStorage.removeItem("authToken");
       navigate("/login");
-    }, 2000); // Simpan jeda selama 2 detik
+    }, 2000);
   };
 
   const navigateToParkingStatus = () => {
-    navigate("/parking-status"); // Navigasi ke halaman Parking Status
+    navigate("/parking-status");
   };
 
   return (
@@ -55,14 +90,18 @@ const Home = () => {
       <div className="w-full flex justify-between items-center p-4 bg-white shadow-md border-b border-purple-500">
         <h2 className="text-2xl font-bold text-blue-600">BikeGuard</h2>
         <div className="flex items-center space-x-4">
-          <span className="font-semibold">Username</span>
+          <img
+            src="https://img.icons8.com/ios-filled/50/000000/user-male-circle.png"
+            alt="User Icon"
+            className="w-6 h-6"
+          />
+          <span className="font-semibold">{username}</span>
           <span
             onClick={handleHistoryClick}
             className="text-gray-600 hover:text-blue-600 cursor-pointer"
           >
             History
           </span>
-          {/* Availability Parking Text */}
           <span
             onClick={navigateToParkingStatus}
             className="text-gray-600 hover:text-blue-600 cursor-pointer"
@@ -87,7 +126,6 @@ const Home = () => {
           className="w-48 mb-6"
         />
 
-        {/* Buttons */}
         <div className="flex flex-col items-center space-y-4">
           <button
             className="px-8 py-3 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition"
@@ -95,22 +133,14 @@ const Home = () => {
           >
             PARK NOW
           </button>
-
-          <button
-            className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
-            onClick={handleSimulatedScan}
-          >
-            Simulate QR Scan
-          </button>
         </div>
 
-        {/* QR Scanner */}
         {showScanner && (
           <div className="relative mt-4">
             <div
               className="overflow-hidden rounded-lg"
               style={{
-                width: "300px", // Ukuran persegi
+                width: "300px",
                 height: "300px",
                 position: "relative",
               }}
@@ -133,14 +163,10 @@ const Home = () => {
           </div>
         )}
 
-        {/* Error Message */}
         {error && <p className="mt-4 text-red-600">{error}</p>}
-
-        {/* QR Data Display */}
         {qrData && <p className="mt-4 text-green-600">QR Code Detected: {qrData}</p>}
       </div>
 
-      {/* Logout Confirmation Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6 shadow-lg">
