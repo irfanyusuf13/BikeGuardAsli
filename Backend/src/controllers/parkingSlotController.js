@@ -112,7 +112,7 @@ exports.lockBicycle = async (req, res) => {
 };
 
     // Controller untuk membatalkan pemesanan dan membuka kunci slot parkir oleh pengguna
-    exports.unlockBicycle = async (req, res) => {
+exports.unlockBicycle = async (req, res) => {
         const { parking_slot_id, user_id } = req.body;
 
         try {
@@ -128,7 +128,7 @@ exports.lockBicycle = async (req, res) => {
 
             // Memeriksa apakah user_id yang membatalkan pemesanan sama dengan reserved_by
             const reservedBy = slotCheck.rows[0].reserved_by;
-            if (reservedBy !== user_id) {
+            if (reservedBy.toString() !== user_id) {
                 return res.status(400).json(BaseApiResponse("Anda tidak dapat membatalkan pemesanan slot parkir ini", null));
             }
 

@@ -23,96 +23,86 @@ const BikeInUse = () => {
       setParkingSlot(slotId);
       fetchParkingSlotDetails(slotId); // Ambil detail slot parkir
     }
-    if (id) setUserId(id); // Set userId
-    else setLoading(false);
+    if (id) setUserId(id);
+    setLoading(false); // Selesai loading data lokal
   }, []);
 
   // Fetch detail slot parkir dari backend
   const fetchParkingSlotDetails = async (slotId) => {
     try {
-        setLoading(true);
-        const response = await axios.get(`http://localhost:3000/parking-slot/${slotId}`);
-        console.log("Detail slot parkir:", response.data.data); // Tambahkan log
-        const slotData = response.data.data;
+      setLoading(true);
+      const response = await axios.get(
+        `http://localhost:3000/parking-slot/${slotId}`
+      );
+      const slotData = response.data.data;
 
-        if (slotData) {
-            setLocation(slotData.location);
-            setStatus(slotData.status); // Set status slot (Available/Unavailable)
-            setIsUnlocked(slotData.status === "Available"); // Set kondisi sepeda
-        } else {
-            setMessage("Detail slot parkir tidak ditemukan.");
-        }
+      if (slotData) {
+        setLocation(slotData.location);
+        setStatus(slotData.status); // Set status slot (Available/Unavailable)
+        setIsUnlocked(slotData.status === "Available");
+      } else {
+        setMessage("Parking slot details not found.");
+      }
     } catch (error) {
-        console.error("Error mengambil detail slot parkir:", error.response?.data || error.message);
-        setMessage("Gagal mengambil informasi slot parkir.");
+      console.error("Error fetching parking slot details:", error.response?.data || error.message);
+      setMessage("Failed to fetch parking slot details.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
+  };
 
-
-  // Handle kunci sepeda
+  // Handle lock bike
   const handleLock = async () => {
     if (!userId) {
-      setMessage("User ID tidak ditemukan.");
+      setMessage("User ID not found.");
       return;
     }
 
     try {
       const response = await axios.post("http://localhost:3000/parking-slot/lock", {
         parking_slot_id: parkingSlot,
-        reserved_by: userId, // Gunakan userId
+        reserved_by: userId,
       });
 
       if (response.data.message === "Slot parkir berhasil diparkir") {
-        setMessage("Sepeda berhasil dikunci.");
-        await fetchParkingSlotDetails(parkingSlot); // Refresh status slot
+        setMessage("Bike successfully locked.");
+        await fetchParkingSlotDetails(parkingSlot);
       } else {
-        setMessage(response.data.message);
+        setMessage(response.data.message || "Failed to lock bike.");
       }
     } catch (error) {
-      console.error("Error saat mengunci sepeda:", error);
-      setMessage("Terjadi kesalahan saat mengunci sepeda. Coba lagi.");
+      console.error("Error locking bike:", error.response?.data || error.message);
+      setMessage("An error occurred while locking the bike. Please try again.");
     }
   };
 
-  // Handle buka kunci sepeda
+  // Handle unlock bike
   const handleUnlock = async () => {
-    if (!parkingSlot) {
-        setMessage("Slot parkir tidak terkunci atau tidak ada pemesan.");
-        return;
+    if (!parkingSlot || !userId) {
+      setMessage("Parking slot or user ID not found.");
+      return;
     }
-
-    console.log("Mengirim permintaan unlock:", {
-        parking_slot_id: parkingSlot,
-        user_id: userId,
-    });
 
     try {
-        const response = await axios.post("http://localhost:3000/parking-slot/unlock", {
-            parking_slot_id: parkingSlot,
-            user_id: userId, // Gunakan userId
-        });
+      const response = await axios.post("http://localhost:3000/parking-slot/unlock", {
+        parking_slot_id: parkingSlot,
+        user_id: userId,
+      });
 
-        console.log("Respons dari server:", response.data);
-
-        if (response.data.message === "Slot parkir berhasil dibatalkan") {
-            setMessage("Sepeda berhasil dibuka.");
-            setIsUnlocked(true); // Tandai sepeda tidak terkunci
-            setStatus("Available"); // Perbarui status
-            await fetchParkingSlotDetails(parkingSlot); // Refresh status slot
-        } else {
-            setMessage(response.data.message);
-        }
-        console.log("Respons dari server:", response.data);
+      if (response.data.message === "Slot parkir berhasil dibatalkan") {
+        setMessage("Bike successfully unlocked.");
+        setIsUnlocked(true);
+        setStatus("Available");
+        await fetchParkingSlotDetails(parkingSlot);
+      } else {
+        setMessage(response.data.message || "Failed to unlock bike.");
+      }
     } catch (error) {
-        console.error("Error saat membuka sepeda:", error.response?.data || error.message);
-        setMessage("Terjadi kesalahan saat membuka sepeda. Coba lagi.");
+      console.error("Error unlocking bike:", error.response?.data || error.message);
+      setMessage("An error occurred while unlocking the bike. Please try again.");
     }
-};
+  };
 
-  
-  
   // Jika loading, tampilkan indikator
   if (loading) {
     return (
@@ -150,7 +140,7 @@ const BikeInUse = () => {
       <div className="flex flex-col items-center justify-center flex-grow">
         <img
           src={
-            status === "Available"
+            isUnlocked
               ? "https://img.icons8.com/ios-filled/100/000000/unlock--v1.png"
               : "https://img.icons8.com/ios-filled/100/000000/lock--v1.png"
           }
@@ -167,7 +157,7 @@ const BikeInUse = () => {
         )}
 
         {/* Tombol dinamis berdasarkan status */}
-        {status === "Available" ? (
+        {isUnlocked ? (
           <button
             onClick={handleLock}
             className="py-2 px-6 rounded-full shadow-md mb-2 bg-blue-500 text-white"
@@ -184,9 +174,7 @@ const BikeInUse = () => {
         )}
 
         <p className="text-gray-600">
-          {status === "Available"
-            ? "Your bike is unlocked!"
-            : "Your Bike Is Locked"}
+          {isUnlocked ? "Your bike is unlocked!" : "Your bike is locked."}
         </p>
 
         {message && <p className="mt-4 text-red-600">{message}</p>}
