@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import axios from "axios"; // Untuk melakukan permintaan ke API
-import { useNavigate } from "react-router-dom"; // Untuk navigasi setelah login berhasil
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [role, setRole] = useState("user");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [adminKey, setAdminKey] = useState(""); // State untuk admin-key
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -13,29 +14,37 @@ const Login = () => {
 
   const handleRoleChange = (event) => {
     setRole(event.target.value);
+    setError(""); // Reset error jika pengguna mengganti role
+    setAdminKey(""); // Reset admin-key jika pengguna mengganti role
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(""); // Reset error sebelum mencoba login
-  
+    setError("");
+
+    // Validasi jika role adalah admin dan admin-key kosong
+    if (role === "admin" && adminKey !== "onlygroup6") {
+      setError("Invalid admin key.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await axios.post("http://localhost:3000/user/login", {
         email,
         password,
         role,
+        adminKey: role === "admin" ? adminKey : undefined, // Hanya kirim adminKey jika role adalah admin
       });
-  
+
       const { data } = response.data;
-  
+
       if (data && data.id) {
-        // Simpan data pengguna ke localStorage
         localStorage.setItem("userId", data.id);
         localStorage.setItem("userRole", data.role);
-        localStorage.setItem("userName", data.name); // Tambahkan ini
-  
-        // Navigasi berdasarkan peran pengguna
+        localStorage.setItem("userName", data.name);
+
         if (data.role === "admin") {
           navigate("/admin");
         } else {
@@ -54,7 +63,6 @@ const Login = () => {
 
   return (
     <section className="flex min-h-screen">
-      {/* Bagian Kiri - Form Login */}
       <div className="w-1/2 flex flex-col justify-center px-12 py-8 bg-white">
         <a href="#" className="text-4xl font-bold text-blue-600 mb-8">
           BIKEGUARD
@@ -101,7 +109,6 @@ const Login = () => {
             />
           </div>
 
-          {/* Dropdown Pilihan Role */}
           <div>
             <label
               htmlFor="role"
@@ -119,6 +126,28 @@ const Login = () => {
               <option value="admin">Admin</option>
             </select>
           </div>
+
+          {/* Input Tambahan untuk Admin Key */}
+          {role === "admin" && (
+            <div>
+              <label
+                htmlFor="adminKey"
+                className="block mb-2 text-sm font-medium text-gray-700"
+              >
+                Admin Key
+              </label>
+              <input
+                type="text"
+                name="adminKey"
+                id="adminKey"
+                placeholder="Enter admin key"
+                className="w-full p-3 border rounded-lg text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                value={adminKey}
+                onChange={(e) => setAdminKey(e.target.value)}
+                required
+              />
+            </div>
+          )}
 
           <button
             type="submit"
@@ -139,7 +168,6 @@ const Login = () => {
         </form>
       </div>
 
-      {/* Bagian Kanan - Gambar Sepeda dengan Warna Background #ADD8E6 */}
       <div className="w-1/2 flex items-center justify-center bg-[#ADD8E6] relative">
         <div className="absolute bottom-10 text-center">
           <h2 className="text-xl font-semibold text-blue-600">

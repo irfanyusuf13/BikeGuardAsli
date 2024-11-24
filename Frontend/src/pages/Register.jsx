@@ -6,6 +6,7 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user"); // Default role: user
+  const [adminKey, setAdminKey] = useState(""); // Admin Key Input
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false); // State untuk loading
@@ -14,11 +15,21 @@ const Register = () => {
 
   const handleRoleChange = (event) => {
     setRole(event.target.value);
+    if (event.target.value !== "admin") {
+      setAdminKey(""); // Reset admin key jika bukan admin
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true); // Set loading menjadi true
+
+    if (role === "admin" && adminKey !== "onlygroup6") {
+      setError("Invalid admin key.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:3000/user/register", {
         method: "POST",
@@ -114,6 +125,21 @@ const Register = () => {
               <option value="admin">Admin</option>
             </select>
           </div>
+
+          {/* Input Admin Key (Hanya Muncul jika Admin) */}
+          {role === "admin" && (
+            <div>
+              <label className="block text-gray-700 font-semibold">Admin Key</label>
+              <input
+                type="password"
+                placeholder="Enter admin key"
+                value={adminKey}
+                onChange={(e) => setAdminKey(e.target.value)}
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
+                required
+              />
+            </div>
+          )}
 
           {/* Pesan Error atau Sukses */}
           {error && <p className="text-red-500">{error}</p>}

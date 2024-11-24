@@ -1,12 +1,21 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 const History = () => {
+  const [username, setUsername] = useState("User"); // Default username
   const parkingData = [
-    { date: '12 October 2024', duration: '1 Hours 30 Minutes', time: '09.30–11.00' },
-    { date: '11 October 2024', duration: '1 Hours 30 Minutes', time: '09.30–11.00' },
-    { date: '10 October 2024', duration: '1 Hours 30 Minutes', time: '09.30–11.00' },
+    { date: "12 October 2024", duration: "1 Hours 30 Minutes", time: "09.30–11.00" },
+    { date: "11 October 2024", duration: "1 Hours 30 Minutes", time: "09.30–11.00" },
+    { date: "10 October 2024", duration: "1 Hours 30 Minutes", time: "09.30–11.00" },
   ];
+
+  // Ambil data pengguna dari localStorage
+  useEffect(() => {
+    const storedName = localStorage.getItem("userName"); // Pastikan key sesuai dengan login
+    if (storedName) {
+      setUsername(storedName);
+    }
+  }, []);
 
   return (
     <div className="bg-blue-50 min-h-screen p-4">
@@ -14,11 +23,15 @@ const History = () => {
       <div className="flex items-center justify-between bg-white px-6 py-4 shadow-md">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-            <span role="img" aria-label="user">👤</span>
+            <span role="img" aria-label="user">
+              👤
+            </span>
           </div>
-          <span className="font-semibold">Username</span>
+          <span className="font-semibold">{username}</span> {/* Tampilkan username */}
         </div>
-        <Link to="/home" className="font-semibold text-gray-700">Home</Link>
+        <Link to="/home" className="font-semibold text-gray-700">
+          Home
+        </Link>
       </div>
 
       {/* Recent Parking */}

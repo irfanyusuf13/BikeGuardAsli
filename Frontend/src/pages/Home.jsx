@@ -121,7 +121,7 @@ const Home = () => {
       <div className="flex flex-col items-center justify-center flex-grow">
         <h1 className="text-4xl font-bold mb-6">WELCOME</h1>
         <img
-          src="https://media.istockphoto.com/id/544330072/id/vektor/ikon-sepeda.jpg?s=612x612&w=0&k=20&c=84oZKWHAZpv1nYlS8pFqLuXmrcEhSTuSd3Qu7aTlS8M="
+          src="https://cdn-icons-png.flaticon.com/512/384/384144.png"
           alt="Bike"
           className="w-48 mb-6"
         />
