@@ -129,25 +129,25 @@ const Login = () => {
 
           {/* Input Tambahan untuk Admin Key */}
           {role === "admin" && (
-            <div>
-              <label
-                htmlFor="adminKey"
-                className="block mb-2 text-sm font-medium text-gray-700"
-              >
-                Admin Key
-              </label>
-              <input
-                type="text"
-                name="adminKey"
-                id="adminKey"
-                placeholder="Enter admin key"
-                className="w-full p-3 border rounded-lg text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                value={adminKey}
-                onChange={(e) => setAdminKey(e.target.value)}
-                required
-              />
-            </div>
-          )}
+          <div>
+          <label
+            htmlFor="adminKey"
+            className="block mb-2 text-sm font-medium text-gray-700"
+          >
+            Admin Key
+          </label>
+          <input
+            type="password" // Ubah tipe input menjadi password
+            name="adminKey"
+            id="adminKey"
+            placeholder="Enter admin key"
+            className="w-full p-3 border rounded-lg text-gray-900 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            value={adminKey}
+            onChange={(e) => setAdminKey(e.target.value)}
+            required
+          />
+        </div>
+        )}
 
           <button
             type="submit"
