@@ -9,10 +9,9 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState("Guest"); // Default ke "Guest"
+  const [username, setUsername] = useState("Guest");
   const navigate = useNavigate();
 
-  // Ambil username dari localStorage saat halaman dimuat
   useEffect(() => {
     const fetchUserData = () => {
       const name = localStorage.getItem("userName");
@@ -25,26 +24,22 @@ const Home = () => {
     fetchUserData();
   }, []);
 
-  // Fungsi untuk menangani hasil scan QR Code
   const handleScan = (data) => {
     if (data && data !== qrData) {
       setQrData(data);
-      verifyQRCode(data); // Panggil fungsi verifikasi
+      verifyQRCode(data);
     }
   };
 
-  // Fungsi untuk memverifikasi QR Code
   const verifyQRCode = (scannedCode) => {
-    setError(null); // Reset error
+    setError(null);
     axios
       .post("http://localhost:3000/qr-code/verify", { code: scannedCode })
       .then((response) => {
         const { message, data } = response.data;
 
         if (message === "QR Code is valid" && data.associatedParkingSlot) {
-          // Simpan parkingSlotId ke localStorage
           localStorage.setItem("parkingSlotId", data.associatedParkingSlot);
-          // Navigasi ke halaman BikeInUse
           navigate("/bike-in-use");
         } else {
           setError("QR Code valid tetapi tidak terkait dengan slot parkir.");
@@ -56,7 +51,6 @@ const Home = () => {
       });
   };
 
-  // Fungsi untuk menangani error saat memindai QR Code
   const handleError = (err) => {
     console.error(err);
     setError("Terjadi kesalahan saat memindai QR Code. Silakan coba lagi.");
@@ -85,32 +79,34 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-blue-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
       {/* Navbar */}
-      <div className="w-full flex justify-between items-center p-4 bg-white shadow-md border-b border-purple-500">
-        <h2 className="text-2xl font-bold text-blue-600">BikeGuard</h2>
-        <div className="flex items-center space-x-4">
-          <img
-            src="https://img.icons8.com/ios-filled/50/000000/user-male-circle.png"
-            alt="User Icon"
-            className="w-6 h-6"
-          />
-          <span className="font-semibold">{username}</span>
+      <div className="w-full flex justify-between items-center p-4 bg-white shadow-lg">
+        <h2 className="text-3xl font-bold text-blue-600">BikeGuard</h2>
+        <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2">
+            <img
+              src="https://img.icons8.com/ios-filled/50/000000/user-male-circle.png"
+              alt="User Icon"
+              className="w-8 h-8"
+            />
+            <span className="text-blue-700 font-semibold">{username}</span>
+          </div>
           <span
             onClick={handleHistoryClick}
-            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+            className="cursor-pointer text-gray-700 hover:text-blue-600"
           >
             History
           </span>
           <span
             onClick={navigateToParkingStatus}
-            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+            className="cursor-pointer text-gray-700 hover:text-blue-600"
           >
             Availability Parking
           </span>
           <span
             onClick={handleLogoutClick}
-            className="text-gray-600 hover:text-blue-600 cursor-pointer"
+            className="cursor-pointer text-gray-700 hover:text-blue-600"
           >
             Log Out
           </span>
@@ -118,32 +114,29 @@ const Home = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center flex-grow">
-        <h1 className="text-4xl font-bold mb-6">WELCOME</h1>
+      <div className="flex flex-col items-center justify-center flex-grow text-center">
+        <h1 className="text-5xl font-extrabold mb-4">Welcome, {username}!</h1>
+        <p className="text-lg font-medium mb-6">
+          Ready to park your bike securely? Let’s get started.
+        </p>
         <img
           src="https://cdn-icons-png.flaticon.com/512/384/384144.png"
           alt="Bike"
-          className="w-48 mb-6"
+          className="w-64 mb-6 animate-pulse"
         />
 
-        <div className="flex flex-col items-center space-y-4">
-          <button
-            className="px-8 py-3 bg-gray-400 text-white font-semibold rounded-lg shadow-md hover:bg-gray-500 transition"
-            onClick={() => setShowScanner(true)}
-          >
-            PARK NOW
-          </button>
-        </div>
+        <button
+          className="px-10 py-4 bg-purple-600 text-white font-bold rounded-lg shadow-lg hover:bg-purple-700 transition-transform transform hover:scale-105"
+          onClick={() => setShowScanner(true)}
+        >
+          PARK NOW
+        </button>
 
         {showScanner && (
-          <div className="relative mt-4">
+          <div className="relative mt-8">
             <div
-              className="overflow-hidden rounded-lg"
-              style={{
-                width: "300px",
-                height: "300px",
-                position: "relative",
-              }}
+              className="rounded-lg shadow-lg bg-white p-4"
+              style={{ width: "320px", height: "320px" }}
             >
               <QrReader
                 scanDelay={300}
@@ -163,41 +156,55 @@ const Home = () => {
           </div>
         )}
 
-        {error && <p className="mt-4 text-red-600">{error}</p>}
-        {qrData && <p className="mt-4 text-green-600">QR Code Detected: {qrData}</p>}
+        {error && <p className="mt-6 text-red-500 text-lg">{error}</p>}
+        {qrData && (
+          <p className="mt-6 text-green-500 text-lg">QR Code Detected: {qrData}</p>
+        )}
       </div>
 
+      {/* Logout Modal */}
       {showLogoutModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            {loading ? (
-              <div className="flex flex-col items-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500 border-solid"></div>
-                <p className="mt-4 text-gray-600">Logging out...</p>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-lg font-semibold mb-4">Confirm Logout</h3>
-                <p className="mb-6">Are you sure you want to log out?</p>
-                <div className="flex space-x-4">
-                  <button
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                    onClick={confirmLogout}
-                  >
-                    Yes, Log Out
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
-                    onClick={() => setShowLogoutModal(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300">
+    <div className="bg-white rounded-lg p-6 shadow-xl transform scale-95 transition-transform duration-300">
+      {loading ? (
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid mb-4"></div>
+          <p className="text-gray-600 font-semibold text-lg">Logging out...</p>
         </div>
+      ) : (
+        <>
+          <div className="flex flex-col items-center text-center">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/463/463612.png"
+              alt="Logout Icon"
+              className="w-16 h-16 mb-4"
+            />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">
+              Confirm Logout
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to log out? You will need to log in again to continue using the app.
+            </p>
+          </div>
+          <div className="flex space-x-4 justify-center">
+            <button
+              className="px-6 py-2 bg-red-600 text-white font-bold rounded-lg shadow-md hover:bg-red-700 transition-transform transform hover:scale-105"
+              onClick={confirmLogout}
+            >
+              Yes, Log Out
+            </button>
+            <button
+              className="px-6 py-2 bg-gray-300 font-bold rounded-lg shadow-md hover:bg-gray-400 transition-transform transform hover:scale-105"
+              onClick={() => setShowLogoutModal(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </>
       )}
+    </div>
+  </div>
+)}
     </div>
   );
 };

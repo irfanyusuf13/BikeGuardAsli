@@ -12,16 +12,16 @@ const AdminPage = () => {
     user_id: "",
   });
   const [loading, setLoading] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false); // Tambahan state untuk animasi logout
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setIsLoggingOut(true); // Tampilkan animasi loading
+    setIsLoggingOut(true);
     setTimeout(() => {
       localStorage.removeItem("authToken");
-      setIsLoggingOut(false); // Hentikan animasi
+      setIsLoggingOut(false);
       navigate("/login");
-    }, 2000); // Logout setelah 2 detik
+    }, 2000);
   };
 
   const handleCreateSlot = () => {
@@ -37,7 +37,6 @@ const AdminPage = () => {
   const handleCreateQRCode = async () => {
     setLoading(true);
     try {
-      // Logic untuk kirim data ke backend dan buat QR code
       const response = await fetch("/api/create-qrcode", {
         method: "POST",
         headers: {
@@ -73,20 +72,20 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-blue-100">
+    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-blue-500 to-teal-500 text-white">
       {/* Navbar */}
-      <div className="w-full flex justify-between items-center p-4 bg-white shadow-md border-b border-teal-500">
-        <h2 className="text-2xl font-bold text-blue-800">BikeGuard</h2>
-        <div className="flex items-center space-x-4">
+      <div className="w-full flex justify-between items-center p-4 bg-white shadow-md">
+        <h2 className="text-3xl font-bold text-blue-600">BikeGuard Admin</h2>
+        <div className="flex items-center space-x-6">
           <span
             onClick={navigateToParkingStatus}
-            className="text-gray-700 hover:text-teal-400 cursor-pointer"
+            className="cursor-pointer text-gray-700 hover:text-teal-500 font-semibold"
           >
-            Availability Parking
+            Parking Status
           </span>
           <span
             onClick={handleLogout}
-            className="text-gray-700 hover:text-teal-400 cursor-pointer"
+            className="cursor-pointer text-gray-700 hover:text-teal-500 font-semibold"
           >
             Log Out
           </span>
@@ -94,19 +93,20 @@ const AdminPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center flex-grow bg-blue-100">
-        <h1 className="text-4xl font-bold text-blue-800 mb-6 mt-16">
-          Welcome, Admin!
-        </h1>
-        <div className="flex flex-col items-center space-y-4">
+      <div className="flex flex-col items-center justify-center flex-grow text-center">
+        <h1 className="text-5xl font-extrabold mb-6">Welcome, Admin!</h1>
+        <p className="text-lg font-medium mb-10">
+          Manage parking slots and QR codes with ease.
+        </p>
+        <div className="space-x-4">
           <button
-            className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition"
+            className="px-8 py-4 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105"
             onClick={() => setShowCreateSlotModal(true)}
           >
             Create Parking Slot
           </button>
           <button
-            className="px-8 py-3 bg-blue-700 text-white font-semibold rounded-lg shadow-md hover:bg-blue-800 transition"
+            className="px-8 py-4 bg-teal-600 text-white font-bold rounded-lg shadow-lg hover:bg-teal-700 transition-transform transform hover:scale-105"
             onClick={() => setShowCreateQRModal(true)}
           >
             Create QR Code
@@ -114,20 +114,20 @@ const AdminPage = () => {
         </div>
       </div>
 
-      {/* Animasi Logout */}
+      {/* Logout Animation */}
       {isLoggingOut && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="flex flex-col items-center space-y-4">
             <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-teal-400 font-medium">Logging Out...</p>
+            <p className="text-teal-400 font-semibold">Logging Out...</p>
           </div>
         </div>
       )}
 
       {/* Create Slot Modal */}
       {showCreateSlotModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-blue-200 rounded-lg p-6 shadow-lg w-96">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6 shadow-xl w-96 transform scale-95 transition-transform">
             <h3 className="text-lg font-semibold text-blue-800 mb-4">
               Create Parking Slot
             </h3>
@@ -136,7 +136,7 @@ const AdminPage = () => {
               placeholder="Enter slot name"
               value={slotName}
               onChange={(e) => setSlotName(e.target.value)}
-              className="w-full p-2 border border-gray-600 rounded-lg bg-blue-100 text-gray-700 mb-4"
+              className="w-full p-2 border border-gray-300 rounded-lg mb-4"
             />
             <div className="flex space-x-4">
               <button
@@ -146,7 +146,7 @@ const AdminPage = () => {
                 {loading ? "Creating..." : "Create"}
               </button>
               <button
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
                 onClick={() => setShowCreateSlotModal(false)}
               >
                 Cancel
@@ -158,8 +158,8 @@ const AdminPage = () => {
 
       {/* Create QR Code Modal */}
       {showCreateQRModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-blue-200 rounded-lg p-6 shadow-lg w-96">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white rounded-lg p-6 shadow-xl w-96 transform scale-95 transition-transform">
             <h3 className="text-lg font-semibold text-blue-800 mb-4">
               Create QR Code
             </h3>
@@ -171,11 +171,10 @@ const AdminPage = () => {
                 onChange={(e) =>
                   setQrCodeData((prev) => ({ ...prev, code: e.target.value }))
                 }
-                className="w-full p-2 border border-gray-600 rounded-lg bg-blue-100 text-gray-700 mb-4"
+                className="w-full p-2 border border-gray-300 rounded-lg mb-4"
               />
               <input
                 type="datetime-local"
-                placeholder="Enter Expiration Date"
                 value={qrCodeData.expiration_date}
                 onChange={(e) =>
                   setQrCodeData((prev) => ({
@@ -183,40 +182,19 @@ const AdminPage = () => {
                     expiration_date: e.target.value,
                   }))
                 }
-                className="w-full p-2 border border-gray-600 rounded-lg bg-blue-100 text-gray-700 mb-4"
-              />
-              <input
-                type="text"
-                placeholder="Enter Parking Slot"
-                value={qrCodeData.associated_parking_slot}
-                onChange={(e) =>
-                  setQrCodeData((prev) => ({
-                    ...prev,
-                    associated_parking_slot: e.target.value,
-                  }))
-                }
-                className="w-full p-2 border border-gray-600 rounded-lg bg-blue-100 text-gray-700 mb-4"
-              />
-              <input
-                type="text"
-                placeholder="Enter User ID (Admin only)"
-                value={qrCodeData.user_id}
-                onChange={(e) =>
-                  setQrCodeData((prev) => ({ ...prev, user_id: e.target.value }))
-                }
-                className="w-full p-2 border border-gray-600 rounded-lg bg-blue-100 text-gray-700 mb-4"
+                className="w-full p-2 border border-gray-300 rounded-lg mb-4"
               />
               <div className="flex space-x-4">
                 <button
                   type="button"
-                  className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:bg-blue-800"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                   onClick={handleCreateQRCode}
                 >
                   {loading ? "Creating..." : "Create"}
                 </button>
                 <button
                   type="button"
-                  className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                  className="px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500"
                   onClick={() => setShowCreateQRModal(false)}
                 >
                   Cancel

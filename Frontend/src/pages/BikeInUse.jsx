@@ -3,31 +3,28 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 
 const BikeInUse = () => {
-  const [isUnlocked, setIsUnlocked] = useState(false); // Status sepeda terkunci/tidak
-  const [parkingSlot, setParkingSlot] = useState(null); // ID slot parkir
-  const [location, setLocation] = useState(""); // Lokasi slot parkir
-  const [username, setUsername] = useState("Guest"); // Nama pengguna
-  const [status, setStatus] = useState(""); // Status slot parkir
-  const [message, setMessage] = useState(""); // Pesan untuk pengguna
-  const [loading, setLoading] = useState(true); // Status loading
-  const [userId, setUserId] = useState(null); // ID pengguna
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [parkingSlot, setParkingSlot] = useState(null);
+  const [location, setLocation] = useState("");
+  const [username, setUsername] = useState("Guest");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    // Ambil data pengguna dan slot parkir dari localStorage
     const name = localStorage.getItem("userName");
     const slotId = localStorage.getItem("parkingSlotId");
-    const id = localStorage.getItem("userId"); // Ambil userId
+    const id = localStorage.getItem("userId");
 
     if (name) setUsername(name);
     if (slotId) {
       setParkingSlot(slotId);
-      fetchParkingSlotDetails(slotId); // Ambil detail slot parkir
+      fetchParkingSlotDetails(slotId);
     }
     if (id) setUserId(id);
-    setLoading(false); // Selesai loading data lokal
+    setLoading(false);
   }, []);
 
-  // Fetch detail slot parkir dari backend
   const fetchParkingSlotDetails = async (slotId) => {
     try {
       setLoading(true);
@@ -38,20 +35,18 @@ const BikeInUse = () => {
 
       if (slotData) {
         setLocation(slotData.location);
-        setStatus(slotData.status); // Set status slot (Available/Unavailable)
         setIsUnlocked(slotData.status === "Available");
       } else {
         setMessage("Parking slot details not found.");
       }
     } catch (error) {
-      console.error("Error fetching parking slot details:", error.response?.data || error.message);
+      console.error("Error fetching parking slot details:", error);
       setMessage("Failed to fetch parking slot details.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle lock bike
   const handleLock = async () => {
     if (!userId) {
       setMessage("User ID not found.");
@@ -71,12 +66,11 @@ const BikeInUse = () => {
         setMessage(response.data.message || "Failed to lock bike.");
       }
     } catch (error) {
-      console.error("Error locking bike:", error.response?.data || error.message);
+      console.error("Error locking bike:", error);
       setMessage("An error occurred while locking the bike. Please try again.");
     }
   };
 
-  // Handle unlock bike
   const handleUnlock = async () => {
     if (!parkingSlot || !userId) {
       setMessage("Parking slot or user ID not found.");
@@ -92,32 +86,29 @@ const BikeInUse = () => {
       if (response.data.message === "Slot parkir berhasil dibatalkan") {
         setMessage("Bike successfully unlocked.");
         setIsUnlocked(true);
-        setStatus("Available");
         await fetchParkingSlotDetails(parkingSlot);
       } else {
         setMessage(response.data.message || "Failed to unlock bike.");
       }
     } catch (error) {
-      console.error("Error unlocking bike:", error.response?.data || error.message);
+      console.error("Error unlocking bike:", error);
       setMessage("An error occurred while unlocking the bike. Please try again.");
     }
   };
 
-  // Jika loading, tampilkan indikator
   if (loading) {
     return (
-      <div className="min-h-screen bg-blue-100 flex flex-col justify-center items-center">
-        <p>Loading...</p>
+      <div className="min-h-screen bg-blue-600 flex items-center justify-center">
+        <p className="text-white text-lg font-semibold">Loading...</p>
       </div>
     );
   }
 
-  // Render halaman utama
   return (
-    <div className="min-h-screen bg-blue-100 flex flex-col">
+    <div className="min-h-screen bg-blue-600 flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center p-4 bg-white shadow-md">
-        <h2 className="text-2xl font-bold text-blue-600 ml-4">BikeGuard</h2>
+      <div className="w-full flex justify-between items-center p-4 bg-white shadow-md border-b border-blue-500">
+        <h2 className="text-2xl font-bold text-blue-600">BikeGuard</h2>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <img
@@ -127,57 +118,62 @@ const BikeInUse = () => {
             />
             <span className="font-semibold">{username}</span>
           </div>
-          <Link to="/history" className="text-black">
+          <Link
+            to="/history"
+            className="text-gray-700 hover:text-blue-600 transition"
+          >
             History
           </Link>
-          <Link to="/home" className="text-black">
+          <Link
+            to="/home"
+            className="text-gray-700 hover:text-blue-600 transition"
+          >
             Home
           </Link>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex flex-col items-center justify-center flex-grow">
+      <div className="flex flex-col items-center justify-center flex-grow text-white">
         <img
           src={
             isUnlocked
-              ? "https://img.icons8.com/ios-filled/100/000000/unlock--v1.png"
-              : "https://img.icons8.com/ios-filled/100/000000/lock--v1.png"
+              ? "https://img.icons8.com/ios-filled/100/4CAF50/unlock--v1.png"
+              : "https://img.icons8.com/ios-filled/100/FF5252/lock--v1.png"
           }
           alt="Lock Icon"
-          className="mb-4"
+          className="mb-6"
         />
-        <p className="text-center font-semibold mb-2">
+        <p className="text-center font-bold text-xl mb-2">
           {parkingSlot
-            ? `Your bicycle is parked at slot: ${parkingSlot}`
+            ? `Your bike is parked at slot: ${parkingSlot}`
             : "No parking slot information available."}
         </p>
         {location && (
-          <p className="text-center text-gray-600 mb-2">Location: {location}</p>
+          <p className="text-center text-lg mb-4">Location: {location}</p>
         )}
 
-        {/* Tombol dinamis berdasarkan status */}
         {isUnlocked ? (
           <button
             onClick={handleLock}
-            className="py-2 px-6 rounded-full shadow-md mb-2 bg-blue-500 text-white"
+            className="px-8 py-3 bg-green-500 text-white font-semibold rounded-full shadow-lg hover:bg-green-600 transition"
           >
             LOCK
           </button>
         ) : (
           <button
             onClick={handleUnlock}
-            className="py-2 px-6 rounded-full shadow-md mb-2 bg-gray-400 text-white"
+            className="px-8 py-3 bg-red-500 text-white font-semibold rounded-full shadow-lg hover:bg-red-600 transition"
           >
             UNLOCK
           </button>
         )}
 
-        <p className="text-gray-600">
-          {isUnlocked ? "Your bike is unlocked!" : "Your bike is locked."}
-        </p>
-
-        {message && <p className="mt-4 text-red-600">{message}</p>}
+        {message && (
+          <p className="mt-6 text-center text-yellow-300 font-medium">
+            {message}
+          </p>
+        )}
       </div>
     </div>
   );

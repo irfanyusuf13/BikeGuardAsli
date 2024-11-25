@@ -5,24 +5,24 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user"); // Default role: user
-  const [adminKey, setAdminKey] = useState(""); // Admin Key Input
+  const [role, setRole] = useState("user");
+  const [adminKey, setAdminKey] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // State untuk loading
+  const [isLoading, setIsLoading] = useState(false);
 
-  const navigate = useNavigate(); // Untuk navigasi setelah registrasi berhasil
+  const navigate = useNavigate();
 
   const handleRoleChange = (event) => {
     setRole(event.target.value);
     if (event.target.value !== "admin") {
-      setAdminKey(""); // Reset admin key jika bukan admin
+      setAdminKey("");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Set loading menjadi true
+    setIsLoading(true);
 
     if (role === "admin" && adminKey !== "onlygroup6") {
       setError("Invalid admin key.");
@@ -40,7 +40,7 @@ const Register = () => {
           name: username,
           email,
           password,
-          role, // Role dikirim langsung dari state
+          role,
         }),
       });
 
@@ -49,10 +49,9 @@ const Register = () => {
         setSuccess(data.message || "Registration successful!");
         setError("");
 
-        // Setelah registrasi berhasil, pindah ke halaman login
         setTimeout(() => {
-          navigate("/login"); // Mengarahkan ke halaman login
-        }, 1000); // Delay sedikit agar pengguna melihat pesan sukses
+          navigate("/login");
+        }, 1500);
       } else {
         setError(data.message || "An error occurred during registration.");
         setSuccess("");
@@ -62,92 +61,95 @@ const Register = () => {
       setError("An error occurred. Please try again later.");
       setSuccess("");
     } finally {
-      setIsLoading(false); // Set loading menjadi false
+      setIsLoading(false);
     }
   };
 
   return (
-    <section className="flex min-h-screen">
-      {/* Bagian Kiri dengan Warna Background #ADD8E6 */}
-      <div className="hidden md:flex w-1/2 bg-[#ADD8E6] items-center justify-center"></div>
+    <section className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+      {/* Left Section */}
+      <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-blue-500 to-blue-700 items-center justify-center text-white">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold">Welcome to BikeGuard</h2>
+          <p className="mt-2 text-lg">
+            Register now and secure your bike with ease.
+          </p>
+        </div>
+      </div>
 
-      {/* Bagian Kanan - Form Register */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center px-12 py-8 bg-white">
-        <h2 className="text-4xl font-bold text-blue-600 mb-2">BikeGuard</h2>
-        <p className="text-gray-600 mb-8">Register Your Account</p>
+      {/* Right Section */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center px-12 py-8 bg-white shadow-lg">
+        <h2 className="text-4xl font-bold text-blue-600 mb-4">Register</h2>
+        <p className="text-gray-600 mb-8">Create your account below.</p>
 
-        <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-sm">
+        <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-md">
           <div>
-            <label className="block text-gray-700 font-semibold">EMAIL</label>
+            <label className="block text-gray-700 font-medium">Email</label>
             <input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full mt-1 px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold">USERNAME</label>
+            <label className="block text-gray-700 font-medium">Username</label>
             <input
               type="text"
               placeholder="Enter your username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full mt-1 px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
           <div>
-            <label className="block text-gray-700 font-semibold">PASSWORD</label>
+            <label className="block text-gray-700 font-medium">Password</label>
             <input
               type="password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
+              className="w-full mt-1 px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
-
-          {/* Dropdown Pilihan Role */}
           <div>
-            <label className="block text-gray-700 font-semibold">Select Role</label>
+            <label className="block text-gray-700 font-medium">Role</label>
             <select
               id="role"
               value={role}
               onChange={handleRoleChange}
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
-              required
+              className="w-full mt-1 px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
           </div>
-
-          {/* Input Admin Key (Hanya Muncul jika Admin) */}
           {role === "admin" && (
             <div>
-              <label className="block text-gray-700 font-semibold">Admin Key</label>
+              <label className="block text-gray-700 font-medium">Admin Key</label>
               <input
                 type="password"
                 placeholder="Enter admin key"
                 value={adminKey}
                 onChange={(e) => setAdminKey(e.target.value)}
-                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:border-blue-500"
+                className="w-full mt-1 px-4 py-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
           )}
 
-          {/* Pesan Error atau Sukses */}
-          {error && <p className="text-red-500">{error}</p>}
-          {success && <p className="text-green-500">{success}</p>}
+          {/* Error or Success Message */}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {success && <p className="text-green-500 text-sm">{success}</p>}
 
+          {/* Submit Button */}
           <button
             type="submit"
-            className={`w-full py-3 text-white font-semibold rounded-lg ${
+            className={`w-full py-3 text-white font-medium rounded-lg transition-all duration-200 ${
               isLoading
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-blue-600 hover:bg-blue-700"
